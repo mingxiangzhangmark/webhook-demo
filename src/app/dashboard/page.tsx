@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { IoArrowBack } from "react-icons/io5";
 import toast, { Toaster } from 'react-hot-toast';
 import MessageCard from '@/components/MessageCard';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../../../firebase';
+
 
 interface Message {
     id: string;
@@ -30,15 +33,40 @@ export default function Dashboard() {
       }, []);
 
     // Fetch messages from the database when the component mounts or userId changes
+    // useEffect(() => {
+    //     if (!userId) return;
+    //     const fetchMessages = async () => {
+    //       console.time("fetchMessages");
+    //       const res = await fetch("/api/messages?userId=" + userId);
+    //       const data = await res.json();
+    //       console.timeEnd("fetchMessages");
+    //       setMessages(data);
+    //     };
+    //     fetchMessages();
+    // }, [userId]);
+
+    
+    // Listen for real-time updates to messages in the database
     useEffect(() => {
         if (!userId) return;
-        const fetchMessages = async () => {
-          const res = await fetch("/api/messages?userId=" + userId);
-          const data = await res.json();
-          setMessages(data);
-        };
-        fetchMessages();
-    }, [userId]);
+      
+        const q = query(collection(db, "messages"), where("userId", "==", userId));
+      
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const newMessages = snapshot.docs.map(doc => {
+            const data = doc.data() as Message; 
+            return {
+              id: doc.id,
+              name: data.name,
+              message: data.message,
+              timestamp: data.timestamp,
+            };
+          });
+          setMessages(newMessages);
+        });
+      
+        return () => unsubscribe(); 
+      }, [userId]);
     
     // Handle form submission
       const handleSubmit = async (e: React.FormEvent) => {
