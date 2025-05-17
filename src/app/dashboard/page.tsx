@@ -15,18 +15,27 @@ interface Message {
 export default function Dashboard() {
     const [name, setName] = useState<string>('')
     const [message, setMessage] = useState<string>('')
-    const [userId, ] = useState(() => localStorage.getItem("userId") || uuidv4());
+    const [userId, setUserId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([])
 
     useEffect(() => {
-        localStorage.setItem("userId", userId);
+        let storedId = localStorage.getItem("userId");
+        if (!storedId) {
+          storedId = uuidv4();
+          localStorage.setItem("userId", storedId);
+        }
+        setUserId(storedId);
+      }, []);
+
+    useEffect(() => {
+        if (!userId) return;
         const fetchMessages = async () => {
           const res = await fetch("/api/messages?userId=" + userId);
           const data = await res.json();
           setMessages(data);
         };
         fetchMessages();
-      }, [userId]);
+    }, [userId]);
 
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
