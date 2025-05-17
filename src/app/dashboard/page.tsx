@@ -5,14 +5,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { IoArrowBack } from "react-icons/io5";
 import toast, { Toaster } from 'react-hot-toast';
 
-
+interface Message {
+    id: string;
+    name: string;
+    message: string;
+    timestamp: string;
+}
 
 export default function Dashboard() {
     const [name, setName] = useState<string>('')
     const [message, setMessage] = useState<string>('')
-    const [userId, setUserId] = useState(() => localStorage.getItem("userId") || uuidv4());
-    const [messages, setMessages] = useState<any[]>([])
-
+    const [userId, ] = useState(() => localStorage.getItem("userId") || uuidv4());
+    const [messages, setMessages] = useState<Message[]>([])
 
     useEffect(() => {
         localStorage.setItem("userId", userId);
