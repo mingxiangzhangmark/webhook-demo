@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { IoArrowBack } from "react-icons/io5";
 import toast, { Toaster } from 'react-hot-toast';
+import MessageCard from '@/components/MessageCard';
 
 interface Message {
     id: string;
@@ -18,6 +19,7 @@ export default function Dashboard() {
     const [userId, setUserId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([])
 
+    // Generate a unique userId and store it in localStorage
     useEffect(() => {
         let storedId = localStorage.getItem("userId");
         if (!storedId) {
@@ -27,6 +29,7 @@ export default function Dashboard() {
         setUserId(storedId);
       }, []);
 
+    // Fetch messages from the database when the component mounts or userId changes
     useEffect(() => {
         if (!userId) return;
         const fetchMessages = async () => {
@@ -36,7 +39,8 @@ export default function Dashboard() {
         };
         fetchMessages();
     }, [userId]);
-
+    
+    // Handle form submission
       const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -59,7 +63,7 @@ export default function Dashboard() {
 
   return (
     <>
-         <main className="p-6">
+         <main className="p-6 min-h-screen ">
          <Toaster
             position="top-center"
             reverseOrder={false}
@@ -121,11 +125,9 @@ export default function Dashboard() {
             .slice() 
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()) 
             .map((msg) => (
-              <li key={msg.id} className="border p-3 rounded">
-                <strong>{msg.name}:</strong> {msg.message} 
-                <div className="text-sm text-gray-500">ID: {msg.id}</div>
-                <div className="text-sm text-gray-500">Timestamp: {new Date(msg.timestamp).toLocaleString()}</div>
-              </li>
+                // Use the MessageCard component to display each message
+              <MessageCard key={msg.id} name={msg.name} message={msg.message} timestamp={msg.timestamp} />
+
             ))}
         </ul>
       </div>
